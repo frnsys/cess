@@ -7,7 +7,7 @@ class QLearner():
         Q-learning allows the agent to learn a policy (that is, the best action to take given a state).
 
         - states_actions: a mapping of states to viable actions for that state
-        - rewards: a mapping of states to a reward value
+        - rewards: a reward function, taking a state as input, or a mapping of states to a reward value
         - discount: how much the agent values future rewards over immediate rewards
         - explore: with what probability the agent "explores", i.e. chooses a random action
         - learning_rate: how quickly the agent learns
@@ -15,7 +15,7 @@ class QLearner():
         self.discount = discount
         self.explore = explore
         self.learning_rate = learning_rate
-        self.R = rewards
+        self.R = rewards.get if isinstance(rewards, dict) else rewards
 
         # previous (state, action)
         self.prev = (None, None)
@@ -42,12 +42,12 @@ class QLearner():
 
     def _best_action(self, state):
         """choose the best action given a state"""
-        actions = list(self.Q[state].items())
-        return max(actions, key=lambda x: x[1])[0]
+        actions_rewards = list(self.Q[state].items())
+        return max(actions_rewards, key=lambda x: x[1])[0]
 
     def _learn(self, state):
         """update Q-value for the last taken action"""
         p_state, p_action = self.prev
         if p_state is None:
             return
-        self.Q[p_state][p_action] = self.learning_rate * (self.R[state] + self.discount * max(self.Q[state].values())) - self.Q[p_state][p_action]
+        self.Q[p_state][p_action] = self.learning_rate * (self.R(state) + self.discount * max(self.Q[state].values())) - self.Q[p_state][p_action]

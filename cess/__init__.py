@@ -1,3 +1,3 @@
 from .sim import Simulation
 from .cluster import Cluster
-from .agent import Agent, Action, Goal, Prereq
+from .agent import Agent, Action, Goal, Prereq, PlanningAgent

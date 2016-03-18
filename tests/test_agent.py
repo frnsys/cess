@@ -1,10 +1,10 @@
 import asyncio
 import unittest
 import operator
-from cess.agent import Agent, Action, Goal, Prereq
+from cess.agent import PlanningAgent, Action, Goal, Prereq
 
 
-class AgentTests(unittest.TestCase):
+class PlanningAgentTests(unittest.TestCase):
     def _coro(self, coro):
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(coro)
@@ -15,7 +15,7 @@ class AgentTests(unittest.TestCase):
         }
         action = Action('work', {}, ([{'cash': 100}], [1.]))
         goal = Goal('money', {'cash': Prereq(operator.ge, 200)}, ([{'cash': 1000}], [1.]))
-        agent = Agent({'cash':0}, [action], [goal], utility_funcs, {})
+        agent = PlanningAgent({'cash':0}, [action], [goal], utility_funcs, {})
 
         from_state = {'cash': 0}
         state_a = {'cash': -100}
@@ -37,7 +37,7 @@ class AgentTests(unittest.TestCase):
         action_goal = Action('hire help', {'cash': Prereq(operator.ge, 200)}, ([{'cash': 1000}], [1.]))
         goal = Goal('money', {'cash': Prereq(operator.ge, 200)}, ([{'cash': 1000}], [1.]))
 
-        agent = Agent({'cash':0}, [action, action_goal], [goal], utility_funcs, {})
+        agent = PlanningAgent({'cash':0}, [action, action_goal], [goal], utility_funcs, {})
         plan, goals = agent.plan(agent.state, agent.goals, depth=3)
         expected_plan = [(action, ({'cash': 75.0}, {goal})), (action, ({'cash': 150.0}, {goal})), (action, ({'cash': 225.0}, {goal}))]
 
@@ -52,7 +52,7 @@ class AgentTests(unittest.TestCase):
             'stress': [0., 1.]
         }
 
-        agent = Agent({'stress':0.5}, [], [], {}, var_constraints)
+        agent = PlanningAgent({'stress':0.5}, [], [], {}, var_constraints)
         self.assertEqual(self._coro(agent['stress']), 0.5)
 
         agent['stress'] = 100

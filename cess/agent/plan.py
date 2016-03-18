@@ -1,4 +1,7 @@
 import math
+from .base import Agent
+from .utility import state_utility, change_utility, goals_utility
+from functools import partial
 
 
 class Planner():
@@ -107,3 +110,79 @@ def hill_climbing(root, succ_func, valid_func, depth):
     # remove the root
     path.pop(0)
     return path, new_goals
+
+
+class PlanningAgent(Agent):
+    """an (expected) utility maximizing agent,
+    capable of managing long-term goals"""
+    def __init__(self, state, actions, goals, utility_funcs, constraints=None):
+        super().__init__(state, constraints)
+        self.goals = set(goals)
+        self.actions = actions
+        self.ufuncs = utility_funcs
+        self.utility = partial(state_utility, self.ufuncs)
+        self.planner = Planner(self._succ_func, self.utility)
+
+    def actions_for_state(self, state):
+        """the agent's possible actions
+        for a given agent state -
+        you probably want to override this"""
+        for action in self.actions:
+            yield action
+
+    def successors(self, state, goals):
+        """the agent's possible successors (expected states)
+        for a given agent state"""
+        # compute expected states
+        succs = []
+        for action in self.actions_for_state(state):
+            expstate = self._expected_state(action, state)
+            succs.append((action, (expstate, goals)))
+
+        for goal in goals:
+            if goal.satisfied(state):
+                expstate = self._expected_state(goal, state)
+                remaining_goals = goals.copy()
+                remaining_goals.remove(goal)
+                succs.append((goal, (expstate, remaining_goals)))
+
+        # sort by expected utility, desc
+        succs = sorted(succs,
+                       key=lambda s: self._score_successor(state, s[1][0]),
+                       reverse=True)
+        return succs
+
+    def _score_successor(self, from_state, to_state):
+        """score a successor based how it changes from the previous state"""
+        chutil = change_utility(self.ufuncs, from_state, to_state)
+        goutil = goals_utility(self.ufuncs, to_state, self.goals)
+        return chutil + goutil
+
+    def subplan(self, state, goal):
+        """create a subplan to achieve a goal;
+        i.e. the prerequisites for an action"""
+        return self.planner.ida(self, state, goal.as_action())
+
+    def _succ_func(self, node):
+        """for planning; returns successors"""
+        act, (state, goals) = node
+        return self.successors(state, goals)
+
+    def _valid_func(self, node, pnode):
+        """for planning; checks if an action is possible"""
+        act, (_, _) = node
+        _, (state, _) = pnode
+        return act.satisfied(state)
+
+    def plan(self, state, goals, depth=None):
+        """generate a plan; uses hill climbing search to minimize searching time.
+        will generate new goals for actions which are impossible given the current state but desired"""
+        plan, goals = hill_climbing((None, (state, self.goals)), self._succ_func, self._valid_func, depth)
+        self.goals = self.goals | goals
+        return plan, self.goals
+
+    def _expected_state(self, action, state):
+        """computes expected state for an action/goal,
+        attenuating it if necessary"""
+        state = action.expected_state(state)
+        return self.attenuate(state)
