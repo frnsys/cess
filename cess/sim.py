@@ -29,4 +29,5 @@ class Simulation():
         else:
             loop = asyncio.get_event_loop()
             tasks = [agent.step(self.state) for agent in self.agents]
-            loop.run_until_complete(asyncio.wait(tasks))
+            if tasks:
+                loop.run_until_complete(asyncio.wait(tasks))
