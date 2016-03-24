@@ -13,3 +13,18 @@ def random_choice(choices):
         acc_prob += prob
         if roll <= acc_prob:
             return choice
+
+
+def shuffle(l):
+    random.shuffle(l)
+    return l
+
+
+def ewma(p_mean, val, alpha=0.8):
+    """computes exponentially weighted moving mean"""
+    return p_mean + (alpha * (val - p_mean))
+
+
+def hyperbolic_discount(value, days, k):
+    discount = 1/(1+days*k)
+    return discount * value
