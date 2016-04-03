@@ -115,8 +115,8 @@ def hill_climbing(root, succ_func, valid_func, depth):
 class PlanningAgent(Agent):
     """an (expected) utility maximizing agent,
     capable of managing long-term goals"""
-    def __init__(self, state, actions, goals, utility_funcs, constraints=None):
-        super().__init__(state, constraints)
+    def __init__(self, state, actions, goals, utility_funcs):
+        super().__init__(state)
         self.goals = set(goals)
         self.actions = actions
         self.ufuncs = utility_funcs
@@ -184,5 +184,4 @@ class PlanningAgent(Agent):
     def _expected_state(self, action, state):
         """computes expected state for an action/goal,
         attenuating it if necessary"""
-        state = action.expected_state(state)
-        return self.attenuate(state)
+        return action.expected_state(state)
