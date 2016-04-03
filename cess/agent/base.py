@@ -10,6 +10,7 @@ class Agent():
     """a basic agent"""
     def __init__(self, state=None):
         self.id = uuid4().hex
+        self.type = type(self)
         self._state = state or {}
 
     def __setitem__(self, key, val):
@@ -17,13 +18,20 @@ class Agent():
         this is only available for a local agent (not an AgentProxy)"""
         self._state[key] = val
 
-    @asyncio.coroutine
     def __getitem__(self, keys):
-        """retrieves a state value;
-        a coroutine for remote access"""
+        """get a state value;
+        this is only available for a local agent (not an AgentProxy)"""
         if isinstance(keys, str):
             return self._state[keys]
-        return {k: self._state[k] for k in keys}
+        return [self._state[k] for k in keys]
+
+    @asyncio.coroutine
+    def get(self, *keys):
+        """retrieves a state value;
+        a coroutine for remote access"""
+        if len(keys) == 1:
+            return self._state[keys[0]]
+        return [self._state[k] for k in keys]
 
     @asyncio.coroutine
     def set(self, **kwargs):
@@ -49,10 +57,11 @@ class AgentProxy():
         self.type = type(agent)
 
     @asyncio.coroutine
-    def __getitem__(self, key):
-        return (yield from self.worker.query_agent({
+    def get(self, *keys):
+        return (yield from self.worker.call_agent({
             'id': self.id,
-            'key': key
+            'func': 'get',
+            'args': keys
         }))
 
     @asyncio.coroutine
@@ -74,3 +83,6 @@ class AgentProxy():
 
     def __repr__(self):
         return 'AgentProxy({}, {})'.format(self.id, self.type.__name__)
+
+    def __eq__(self, other):
+        return self.id == other.id

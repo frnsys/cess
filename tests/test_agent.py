@@ -7,21 +7,23 @@ class AgentTests(unittest.TestCase):
     @async
     def test_get_single(self):
         agent = Agent(state={'aa': 1, 'bb': 2, 'cc': 3})
-        result = yield from agent['aa']
+        result = yield from agent.get('aa')
         self.assertEqual(result, 1)
 
     @async
     def test_get_multiple(self):
         agent = Agent(state={'aa': 1, 'bb': 2, 'cc': 3})
-        result = yield from agent['aa', 'bb']
-        self.assertEqual(result, {'aa': 1, 'bb': 2})
+        aa, bb = yield from agent.get('aa', 'bb')
+        self.assertEqual(aa, 1)
+        self.assertEqual(bb, 2)
 
     @async
     def test_set(self):
         agent = Agent(state={'aa': 1, 'bb': 2, 'cc': 3})
         yield from agent.set(aa=10, bb=20)
-        result = yield from agent['aa', 'bb']
-        self.assertEqual(result, {'aa': 10, 'bb': 20})
+        aa, bb = yield from agent.get('aa', 'bb')
+        self.assertEqual(aa, 10)
+        self.assertEqual(bb, 20)
 
     @async
     def test_call(self):
