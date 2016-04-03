@@ -1,33 +1,44 @@
 import asyncio
+from .agent import AgentProxy
 from .cluster import Cluster, proxy_agents
 
 
 class Simulation():
-    def __init__(self, agents, arbiter=None):
-        """a agent-based simulation.
-        if you specify a connection tuple for `arbiter`, e.g. `('127.0.0.1', 8888)`,
-        this will distribute the agents to the arbiter's cluster"""
+    def __init__(self, agents):
+        """a agent-based simulation"""
         self.agents = agents
         self.state = {}
 
+    def run(self, steps, arbiter=None):
+        """run the simulation for a specified number of time steps.
+        if you specify a connection tuple for `arbiter`, e.g. `('127.0.0.1', 8888)`,
+        this will distribute the agents to the arbiter's cluster"""
         if arbiter is not None:
             # distribute agents across cluster
-            for agent in agents:
+            for agent in self.agents:
                 proxy_agents(agent)
 
             host, port = arbiter
-            self.cluster = Cluster(host, port)
-            self.cluster.submit('populate', agents=agents)
-        else:
-            self.cluster = None
+            cluster = Cluster(host, port)
+            cluster.submit('populate', agents=self.agents)
 
+            _agents = []
+            for agent in self.agents:
+                proxy = AgentProxy(agent)
+                proxy.worker = cluster
+                _agents.append(proxy)
+            self.agents = _agents
+
+        loop = asyncio.get_event_loop()
+        for _ in range(steps):
+            loop.run_until_complete(self.step())
+
+    @asyncio.coroutine
     def step(self):
         """run the simulation one time-step"""
-        if self.cluster is not None:
-            # each node steps over its agents
-            self.cluster.submit('call_agents', func='step', args=(self.state,))
-        else:
-            loop = asyncio.get_event_loop()
-            tasks = [agent.step(self.state) for agent in self.agents]
-            if tasks:
-                loop.run_until_complete(asyncio.wait(tasks))
+        raise NotImplementedError
+
+    def sync(self, coro):
+        """run a coroutine synchronously"""
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(coro)
