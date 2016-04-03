@@ -7,7 +7,6 @@ class Simulation():
     def __init__(self, agents):
         """a agent-based simulation"""
         self.agents = agents
-        self.state = {}
 
     def run(self, steps, arbiter=None):
         """run the simulation for a specified number of time steps.
