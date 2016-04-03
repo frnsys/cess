@@ -8,16 +8,36 @@ class Cluster(Client):
         super().__init__(host, port)
 
     def submit(self, command, **data):
-        """submit a command (and optionally data) to the arbiter"""
+        """submit a command (and optionally data) to the arbiter (synchronous)"""
         data.update({'cmd': command})
 
-        # assuming the script controlling the cluster is synchronous
         loop = asyncio.get_event_loop()
         results = loop.run_until_complete(self.send_recv(data))
         for result in results:
             if 'exception' in result:
                 print(result['traceback'])
         return results
+
+    @asyncio.coroutine
+    def call_agents(self, func, *args, **kwargs):
+        return (yield from self.send_recv({
+            'cmd': 'call_agents',
+            'func': func,
+            'args': args,
+            'kwargs': kwargs
+        }))
+
+    @asyncio.coroutine
+    def call_agent(self, data):
+        d = {'args': [], 'kwargs': {}}
+        d.update(data)
+        d['cmd'] = 'call_agent'
+        return (yield from self.send_recv(d))
+
+    @asyncio.coroutine
+    def query_agent(self, data):
+        data['cmd'] = 'query_agent'
+        return (yield from self.send_recv(data))
 
 
 def proxy_agents(agent):

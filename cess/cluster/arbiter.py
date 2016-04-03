@@ -13,7 +13,6 @@ class Arbiter(Server):
     def __init__(self):
         self.agents = {}
         self.workers = {}
-        self.commanders = {}
         super().__init__()
         self.handlers = {
             'register': self.register,
