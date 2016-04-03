@@ -47,7 +47,7 @@ class SchellingSim(Simulation):
 
     @asyncio.coroutine
     def place(self, agent, pos):
-        prev_pos = yield from agent['pos']
+        prev_pos = yield from agent.get('pos')
         if prev_pos is not None:
             self.space.node[prev_pos] = {'agent': None}
         self.space.node[pos] = {'agent': agent}
@@ -55,15 +55,15 @@ class SchellingSim(Simulation):
 
     @asyncio.coroutine
     def compute_satisfaction(self, agent):
-        state = yield from agent['type', 'similar', 'pos']
-        neighbors = [n for n in self.neighbors(state['pos']) if n['agent'] is not None]
+        type, similar, pos = yield from agent.get('type', 'similar', 'pos')
+        neighbors = [n for n in self.neighbors(pos) if n['agent'] is not None]
         if neighbors:
-            similar = []
+            similars = []
             for n in neighbors:
-                type = yield from n['agent']['type']
-                if type == state['type']:
-                    similar.append(n)
-            satisfied = len(similar)/len(neighbors) >= state['similar']
+                type_ = yield from n['agent'].get('type')
+                if type_ == type:
+                    similars.append(n)
+            satisfied = len(similars)/len(neighbors) >= similar
         else:
             satisfied = True
         return satisfied
