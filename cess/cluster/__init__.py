@@ -34,11 +34,6 @@ class Cluster(Client):
         d['cmd'] = 'call_agent'
         return (yield from self.send_recv(d))
 
-    @asyncio.coroutine
-    def query_agent(self, data):
-        data['cmd'] = 'query_agent'
-        return (yield from self.send_recv(data))
-
 
 def proxy_agents(agent):
     """recursively replace all Agent references in the agent to AgentProxy"""

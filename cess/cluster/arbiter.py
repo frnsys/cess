@@ -18,7 +18,6 @@ class Arbiter(Server):
             'register': self.register,
             'populate': self.populate,
             'call_agent': self.call_agent,
-            'query_agent': self.query_agent,
             'call_agents': self.call_agents,
         }
 
@@ -67,18 +66,6 @@ class Arbiter(Server):
     @asyncio.coroutine
     def call_agent(self, data):
         """call a method on an agent and get the result"""
-        id = data['id']
-
-        # find worker that agent is at
-        worker_id = self.agents[id]
-        worker = self.workers[worker_id]
-
-        # pass along the request to that worker, return the result
-        return (yield from worker.send_recv(data))
-
-    @asyncio.coroutine
-    def query_agent(self, data):
-        """query an agent's state"""
         id = data['id']
 
         # find worker that agent is at

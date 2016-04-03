@@ -18,7 +18,6 @@ class Worker(Server):
         self.handlers = {
             'populate': self.populate,
             'call_agent': self.call_agent,
-            'query_agent': self.query_agent,
             'call_agents': self.call_agents,
         }
         self.id = uuid4().hex
@@ -86,18 +85,3 @@ class Worker(Server):
         else:
             d['cmd'] = 'call_agent'
             return (yield from self.arbiter.send_recv(d))
-
-    @asyncio.coroutine
-    def query_agent(self, data):
-        """query an agent's state"""
-        id = data['id']
-
-        # check locally
-        if id in self.agents:
-            agent = self.agents[id]
-            return (yield from agent[data['key']])
-
-        # pass request to the arbiter
-        else:
-            data['cmd'] = 'query_agent'
-            return (yield from self.arbiter.send_recv(data))
