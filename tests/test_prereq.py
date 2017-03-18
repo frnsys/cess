@@ -4,6 +4,7 @@ from cess.agent.prereq import Prereq, distance_to_prereqs
 
 
 class PrereqTests(unittest.TestCase):
+
     def test_prereqs_satisfied(self):
         prereq = Prereq(operator.lt, 10)
         self.assertTrue(prereq(1))
@@ -69,3 +70,6 @@ class PrereqTests(unittest.TestCase):
 
         state = {'sup': 6}
         self.assertTrue(distance_to_prereqs(state, prereqs) > 0.0)
+
+if __name__ == '__main__':
+    unittest.main()
