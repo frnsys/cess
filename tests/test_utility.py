@@ -39,3 +39,6 @@ class UtilityTests(unittest.TestCase):
         util2 = utility.goal_utility(ufuncs, state, goal)
 
         self.assertTrue(util1 > util2)
+
+if __name__ == '__main__':
+    unittest.main()
