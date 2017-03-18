@@ -40,3 +40,6 @@ class OutcomeTests(unittest.TestCase):
             [({'cash': 1100}, 0.8), ({'cash': 2100}, 0.2)]
         )
 
+if __name__ == '__main__':
+    unittest.main()
+
