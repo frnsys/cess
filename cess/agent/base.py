@@ -3,11 +3,15 @@ from uuid import uuid4
 
 
 class Agent():
+    """A very 'basic agent'. 
+    Mostly a wrapper for a dict indicting current state.
+    dict it key/value pairs. Usually 'string';[int|lfoat] 
+    """
+
     # workaround for <https://github.com/uqfoundation/dill/issues/75>
     # instead of using `super()`, use `self._super(Subclass, self)`
     _super = super
 
-    """a basic agent"""
     def __init__(self, state=None):
         self.id = uuid4().hex
         self.type = type(self)
@@ -27,15 +31,19 @@ class Agent():
 
     @asyncio.coroutine
     def get(self, *keys):
-        """retrieves a state value;
-        a coroutine for remote access"""
+        """retrieves a state value; a coroutine for remote access"
+        @returns single value for one key
+        @returns if more than one 'key' specified, a dict is returned
+        """
         if len(keys) == 1:
             return self._state[keys[0]]
         return [self._state[k] for k in keys]
 
     @asyncio.coroutine
     def set(self, **kwargs):
-        """set one or more state variables"""
+        """set one or more state variables
+        Expected is an args=key value to set list """
+        #TRICKY: list is not checked before applying 
         self._state.update(kwargs)
 
     @asyncio.coroutine
@@ -47,7 +55,9 @@ class Agent():
 
 
 class AgentProxy():
-    """an agent proxy represents an agent that is accessed remotely"""
+    """an agent proxy represents an agent that is accessed remotely.
+    Includes internal worker thread"""
+
     # the worker the agent belongs to,
     # assigned when agents are distributed
     worker = None
