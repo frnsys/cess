@@ -2,28 +2,37 @@ import math
 
 
 class Prereq():
-    """a prerequisite, e.g. for a goal or an action"""
+    """a prerequisite, condiiton for a goal or an action.
+    Class to represent a prerequisiste, and check if it was 
+    satisified."""
 
     def __init__(self, comparator, target):
-        """a comparator is a 2-arity predicate;
-        the target is the value to compare to.
+        """
+        @param comparator is a 2-arity predicate;
+        @target is the value to compare to.
         generally you would use something like `operator.le`
         as a comparator."""
         self.target = target
         self.comparator = comparator
 
     def __call__(self, val):
+        '''True if the passed value causes this to Prereq be satisifed'''
+        if val is  None:
+            return False
         return self.comparator(val, self.target)
 
+
     def __and__(self, other_prereq):
+        """returns a new prereq AND'd with this prereq"""
         return AndPrereq(self, other_prereq)
 
     def __or__(self, other_prereq):
+        """returns a new prereq OR'd with this prereq"""
         return OrPrereq(self, other_prereq)
 
     def distance(self, val):
-        """squared normalized distance to value;
-        squared so it can be used to calculate euclidean distance"""
+        """returns squared normalized distance to value;
+        it can be used to calculate euclidean distance"""
         # if satisfied, distance = 0
         if self(val):
             return 0
