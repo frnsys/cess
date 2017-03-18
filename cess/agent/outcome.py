@@ -43,7 +43,6 @@ def resolve_outcomes(state, updates, dist):
     # note this does NOT re-cast or attenuate values, that is up to you
     print('x')
     if update and '~' in update:
-        import pdb; pdb.set_trace()
         state.update(update['~'](state))
     return state
 
