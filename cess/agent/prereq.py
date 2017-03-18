@@ -3,6 +3,7 @@ import math
 
 class Prereq():
     """a prerequisite, e.g. for a goal or an action"""
+
     def __init__(self, comparator, target):
         """a comparator is a 2-arity predicate;
         the target is the value to compare to.

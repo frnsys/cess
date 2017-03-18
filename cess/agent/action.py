@@ -6,13 +6,29 @@ class PrereqsUnsatisfied(Exception):
 
 
 class Action():
-    """an action an agent can take. actions has a distribution
-    of possible outcomes and may have prerequisites"""
+    """
+    An action an agent can take. actions has a distribution
+    of possible outcomes and may have prerequisites.
+    """
+
     def __init__(self, name, prereqs, outcomes, cost=1):
-        """`outcomes` is a tuple of `(updates, dist)`,
-        where `updates` is a list of update dictionaries and `dist` is
-        either a list of probabilities for each corresponding state update,
-        or a callable which returns such a list of probabilities"""
+        """`
+        @param 'name' name to reference this action by
+        @param prerequs  dict of 'value-name':cess.Prereq(compare_lamda, value) object
+        @param outcomes a tuple of `(updates, dist)`,
+        where `updates`  = list of update dictionaries where key in ? and value is ??
+        where `dist` is either 
+         - a list of probabilities for each corresponding state update,
+         - a callable which returns such a list of probabilities.
+        """
+        if name is None:
+            name = 'untitled action'
+        if prereqs is None:
+            prereqs = {}
+        if outcomes is None or len(outcomes) < 2:
+            outcomes = (None,None) #set defaults
+        if cost is None:
+            cost = 0
         self.name = name
         self.prereqs = prereqs
         self.updates, self.dist = outcomes
@@ -23,14 +39,30 @@ class Action():
 
     def __call__(self, state):
         """complete this action (if its prereqs are satisfied),
-        returning an outcome state"""
+        @returns an outcome state"""
         if not self.satisfied(state):
             raise PrereqsUnsatisfied
         return resolve_outcomes(state, self.updates, self.dist)
-
+ 
     def satisfied(self, state):
-        """check that the action's prereqs are satisfied by the specified state"""
-        return all(prereq(state[k]) for k, prereq in self.prereqs.items())
+        """ True if this Action's prerequisistes are satisifed by 
+        the passed state.
+        @parm: state: dict of {substate_key';substate_value }
+        @true if all prerequisities are satisifed by the passed states
+        """
+        sat = []
+        for p_key, prereqObj in self.prereqs.items():
+            if state is None:
+                sat.append(None)
+                break
+            elif p_key in state.keys():
+                reqObj =  self.prereqs[p_key]
+                isSat = reqObj( state[p_key] )
+                sat.append(isSat)
+            else: 
+                sat.append(False) # key not in state, can't be satisifed
+        return all(sat)
+        #return all(prereq(state[k]) for k, prereq in self.prereqs.items())
 
     def cost(self):
         return self._cost
