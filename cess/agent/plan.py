@@ -5,13 +5,13 @@ from functools import partial
 
 
 class Planner():
+
     def __init__(self, succ_func, util_func):
         self.succ_func = succ_func
         self.util_func = util_func
 
     def heuristic(self, node, goal):
         """an admissible heuristic never overestimates the distance to the goal"""
-
         # override this with a better heuristic
         return 0
 
@@ -28,7 +28,8 @@ class Planner():
             return cost * 0.1 * (math.tanh(-util) + 1)
 
     def _ida(self, agent, path, goal, length, depth, seen):
-        """subroutine for iterative deepening A*"""
+        """subroutine for iterative deepening A*. Returns
+        @returns tuple of (min-distance-found,"""
         _, node = path[-1]
 
         f = length + self.heuristic(node, goal)
@@ -113,8 +114,12 @@ def hill_climbing(root, succ_func, valid_func, depth):
 
 
 class PlanningAgent(Agent):
-    """an (expected) utility maximizing agent,
-    capable of managing long-term goals"""
+    """An (expected) utility maximizing agent,
+    capable of managing long-term goals.
+    @param state: starting state of the agent.
+    @param actions: list of Action objects
+    @param goal: list of Goal objects
+    @param dict of  utility functions"""
     def __init__(self, state, actions, goals, utility_funcs):
         super().__init__(state)
         self.goals = set(goals)

@@ -35,3 +35,6 @@ class LearningTests(unittest.TestCase):
         for s, actions in learner.Q.items():
             for a, v in actions.items():
                 self.assertNotEqual(v, 0)
+
+if __name__ == '__main__':
+    unittest.main()

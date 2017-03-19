@@ -4,6 +4,7 @@ from tests import async, TestAgent
 
 
 class AgentTests(unittest.TestCase):
+
     @async
     def test_get_single(self):
         agent = Agent(state={'aa': 1, 'bb': 2, 'cc': 3})
@@ -30,3 +31,6 @@ class AgentTests(unittest.TestCase):
         agent = TestAgent()
         result = yield from agent.call('multiply', 10)
         self.assertEqual(result, 20)
+
+if __name__ == '__main__':
+    unittest.main()
