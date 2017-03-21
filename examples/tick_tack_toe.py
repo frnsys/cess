@@ -1,28 +1,30 @@
 """
 Simple example of playing Tick Tack Toe between two agents.
-
 """
 import asyncio
 import random
 from cess import Simulation, Agent
 
 
-class TickTackToeAgent(Agent):
-    """ Agent to play TickTackToe. Key needs:
-        - to set-up and maintain own state, 
-        - notify back to sim changes/update to make
-        - etc
+class tttRandomAgnet(Agent):
+    """ Agent to play TickTackToe by choosing  random location 
+    for next move. Key needs:
+    - to set-up and maintain own state, 
+    - notify back to sim changes/update to make
     """
 
     def __init__(self, mark='X'):
-        self._super(TickTackToeAgent, self).__init__(state={} )
+        """create superobject, sets our own mark(X,O) """
+        self._super(tttRandomAgnet, self).__init__(state={} )
         self.mark = mark
    
     def pickMove(self, board):
-        """ board is  a tuple of  tuple, current board state, 
+        """ Decides next place to put a mark.
+        @board is  a tuple of  tuple, the current board state, 
         states are 'X','O',None
         @returns x,y tuple for where to mark our spot, 
         None if no spots left"""
+
         #remove points used 
         b = [i for i in range(0,9) ]
         for  x in range( 0,len(board) ):
@@ -36,6 +38,8 @@ class TickTackToeAgent(Agent):
         pick = random.choice(b) 
         x = pick % 3   
         y = (pick - x)/3
+
+        #return our pick
         return (x,y) 
 
 class TickTackToeSim(Simulation): 
@@ -44,6 +48,8 @@ class TickTackToeSim(Simulation):
     call agents and let agents do their decisions. """
 
     def __init__(self, agents): 
+        """Crate our base object, arent, our board, and our list
+        of win-cases """
         super().__init__(agents)
         self.board = [ 
                 [None, None, None], 
@@ -60,33 +66,37 @@ class TickTackToeSim(Simulation):
 
     @asyncio.coroutine
     def step (self):
+        """ Run our next simulation-round 
+        X and 0 both pick and mark, and win-state is checked
+        @return None"""
         x = self.agents[0]
         o = self.agents[1]
         newMark = x.pickMove(self.board)
-        if newMark is None:
-            print("tie, no win")
+        if newMark is not None:
+            self.boardUpdate(newMark, x.mark)
+        else: #no new mark, must be no move, must be a tie
+            #print("tie, no win")
             self.isDone = True 
-        self.boardUpdate(newMark, x.mark)
         won = self.checkIfWon(x.mark)
         if not won: 
             newMark = o.pickMove(self.board)
-            if newMark is None:
-                print("tie, no win")
+            if newMark is not None:
+                self.boardUpdate(newMark, o.mark)
+            else: #no new mark, must be no move, must be a tie
+                #print("tie, no win")
                 self.isDone= True
-            self.boardUpdate(newMark, o.mark)
             won = self.checkIfWon(o.mark)
             if won:
                 self.isDone = True 
-                print("O Won")
+                #print("O Won")
         else:
             self.isDone = True
-            print("X Won")
-        print( self.board  )
-        print( '----' )
+            #print("X Won")
 
         
     def checkIfWon(self, mark):
-        """" if someone has one, returns the mark of the winner."""
+        """" Check if a win-state was reached, 
+        @returns True if a win detected, False otherwise"""
         #there are more elegant ways of this, but it works
         k = []
         for i in range(0,3): 
@@ -108,23 +118,43 @@ class TickTackToeSim(Simulation):
         return False
 
     def boardUpdate(self, move, mark): 
-        """ Update board state. w new move
-        @move is a tuple of (x,y) location"""
+        """ Update board state with the passed-in move
+        @move is a tuple of (x,y) location. 
+        @return True if updaetd, False if not updated."""
         if move is None:
-            print("No possible Move. Tie")
-            return None
+            #return False to flag this
+            return False 
 
         x,y = move
         self.board[int(y)][int(x)] =  mark
+        return True
+
+    def getBoard(self):
+        """returns a multi-line string of the state of the board"""
+        ret = []
+        ret.append('----------')
+        if self.board : 
+            for i in range(0,len(self.board)):
+                #import pdb; pdb.set_trace()
+                c = [ str(x) for x in self.board[i] ]
+                line  = '\t'.join(c)
+                ret.append(line)
+        ret.append('----------')
+        return '\n'.join(ret)
 
 def main():
-    print("starting tick-tack-toe demo")
-    agentA = TickTackToeAgent('X')
-    agentB = TickTackToeAgent('O')
+    runOneRound_RandomAgents()
 
-    #import pdb; pdb.set_trace() 
+def runOneRound_RandomAgents():
+    """ runs one round of tick tack toe using a random'choice agent """
+    print("starting tick-tack-toe between random agent")
+    agentA = tttRandomAgnet('X')
+    agentB = tttRandomAgnet('O')
     ttSim = TickTackToeSim([agentA, agentB])
     ttSim.run(10)
+    b = ttSim.getBoard()
+    print(b)
+
     
 
 
