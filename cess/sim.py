@@ -9,7 +9,7 @@ class Simulation():
     def __init__(self, agents):
         """a agent-based simulation"""
         self.agents = agents
-        self.isDone = False
+        self.is_done = False
 
     def run(self, steps, arbiter=None):
         """run the simulation for a specified number of time steps.
@@ -33,7 +33,7 @@ class Simulation():
 
         loop = asyncio.get_event_loop()
         for _ in range(steps):
-            if self.isDone :
+            if self.is_done :
                 break
             loop.run_until_complete(self.step())
 

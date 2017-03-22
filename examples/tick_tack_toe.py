@@ -6,7 +6,7 @@ import random
 from cess import Simulation, Agent
 
 
-class tttRandomAgnet(Agent):
+class tttRandomAgent(Agent):
     """ Agent to play TickTackToe by choosing  random location 
     for next move. Key needs:
     - to set-up and maintain own state, 
@@ -15,7 +15,7 @@ class tttRandomAgnet(Agent):
 
     def __init__(self, mark='X'):
         """create superobject, sets our own mark(X,O) """
-        self._super(tttRandomAgnet, self).__init__(state={} )
+        self._super(tttRandomAgent, self).__init__(state={} )
         self.mark = mark
    
     def pickMove(self, board):
@@ -148,8 +148,8 @@ def main():
 def runOneRound_RandomAgents():
     """ runs one round of tick tack toe using a random'choice agent """
     print("starting tick-tack-toe between random agent")
-    agentA = tttRandomAgnet('X')
-    agentB = tttRandomAgnet('O')
+    agentA = tttRandomAgent('X')
+    agentB = tttRandomAgent('O')
     ttSim = TickTackToeSim([agentA, agentB])
     ttSim.run(10)
     b = ttSim.getBoard()
