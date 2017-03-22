@@ -1,13 +1,21 @@
 # cess
-
-(short for "cesspool")
-
 A simple framework for agent-based modeling which includes support for distributed simulations.
 
+(short for cesspool) 
+
 ## Installation
+To use cess as-is, just install via pip
 
     pip install cess
 
+## Development:
+To run a developent version to add changes to cess, do something like:
+
+    virtualenv venv #make a virtualenv
+    . ./venv/bin/activate #start the env
+    pip -r requirements.txt #install tools/libs
+    ./runtest.sh #run unit-tests
+    
 ## Distributed support
 
 There are three components to the distributed simulation support:
